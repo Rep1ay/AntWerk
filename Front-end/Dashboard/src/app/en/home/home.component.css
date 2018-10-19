@@ -13,3 +13,8 @@
 .click2edit{
     position: relative;
 }
+
+.note-btn .saveBtn{
+    background: #337ab7;
+    color: #fff;
+}

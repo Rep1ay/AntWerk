@@ -19,7 +19,7 @@ export class HomeComponent implements OnInit {
   errorMessage: string;
   postSaved : boolean = false;
   currentElem: any;
-  currentTargetParents: any;
+  currentTarget: any;
   btnExist = false;
   private _formBuilder: FormBuilder;
   savePostForm: FormGroup;
@@ -49,95 +49,153 @@ export class HomeComponent implements OnInit {
           console.log(err);
         }
       );
-  };
+  }
 
   eventBinder(){
 
     let _self = this;
     this.btnExist = true;
+
     let btnEdit = document.createElement('button');
     let textNodeEdit = document.createTextNode('Edit');
-    let btnSave = document.createElement('button');
-    this.saveBtnPublic = btnSave;
-    let textNodeSave = document.createTextNode('Save');
 
+    
+    let btnBlock = document.createElement('div');
+
+    btnEdit.appendChild(textNodeEdit);
+   
+
+
+    btnBlock.appendChild(btnEdit);
+    // btnBlock.appendChild(btnSave);
+
+    let left;
+    
     $('section.click2edit').hover(function(event){
-      
-      // _self.save(this.lastTarget);
-      if(this.lastTarget){
-        // $(event.target).summernote('destroy');
-      }
-    
-      let left = $(this).width() - 100;
-      // let top =$(this).height()/2;
-      let position = $(this).position();
-      // let left = position.left;
-      let top = position.top;
-      btnEdit.appendChild(textNodeEdit);
-      btnSave.appendChild(textNodeSave);
-    
-      btnEdit.setAttribute('style', `position:absolute;left:${left}px;top:${top + 5}px;z-index:1`);
-      btnSave.setAttribute('style', `position:absolute;left:${left + 50}px;top:${top + 5}px;z-index:1`);
-      // this.saveBtnPublick = btnSave;
-      $(btnEdit).insertBefore($(this));
-      $(btnSave).insertBefore($(this));
-      // $(this).append(btnSave);
 
-      $(btnSave).off('click').on('click', (event) =>{
-        _self.save($(this));
-      });
+      if(event.relatedTarget){
+         if(!event.relatedTarget.classList.contains('saveBtn') && !event.relatedTarget.classList.contains('editBtn')){
+          this.lastTarget = $(this);
+          left = this.clientWidth - 100;
+          let position = $(this).position();
+          let top = position.top;
+
+          btnBlock.setAttribute('style', `position:absolute;left:${left}px;top:${top}px;z-index:1`);
+          btnBlock.setAttribute('class', 'btnBlock');
+          $(btnBlock).insertBefore($(this));
+
+        }
+      }
 
       $(btnEdit).off('click').on('click', (event) =>{
-        $(this.saveBtnPublick).remove();
-        if(this.lastTarget){
-          $(this.lastTarget).summernote('destroy');
-        }else{
-          if(event.currentTarget.classList.contains('click2edit')){
-            $(event.currentTarget).summernote('destroy');
-          }else{
-            $(this.lastTarget).summernote('destroy');
-          }
+        let send_body = {
+          elem: $(this),
+          position: left,
+          btnBlock: btnBlock,
+          btnEdit: btnEdit
         }
-        _self.edit($(this));
+          _self.edit(send_body);
+        });
       });
-    if(event.currentTarget.classList.contains('click2edit')){
-      this.lastTarget = event.currentTarget;
-    }
-    });
-  };
-
-  edit(elem){
-    let _self = this;
-    $(this.lastTarget).removeChild
-    this.lastTarget = elem;
-    let btnSave = document.createElement('button');
-    let textNodeSave = document.createTextNode('Save');
-    // $('.click2edit').summernote({focus: true});
-    let left = $(elem).width() - 100;
-    // let top =$(this).height()/2;
-    let position = $(elem).position();
-    // let left = position.left;
-    let top = position.top;
-    btnSave.appendChild(textNodeSave);
-    
-    btnSave.setAttribute('style', `position:absolute;left:${left + 50}px;top:${top + 5}px;z-index:1`);
-
-    $(btnSave).insertBefore($(elem));
-    // $(this).append(btnSave);
-
-    $(btnSave).off('click').on('click', (event) =>{
-      debugger
-      _self.save($(elem));
-    });
-    
-    $(elem).summernote();
   }
 
-  save(elem){
-    this.currentElem = elem;
-    let markup = $(elem).summernote('code');
-    debugger
-    $(elem).summernote('destroy');
+  edit(body){
+    
+    let _self = this;
+    // let btnSave = document.createElement('button');
+    // let textNodeSave = document.createTextNode('Save');
+
+    // let btnCancel = document.createElement('button');
+    // let textNodeCancel = document.createTextNode('Cancel');
+
+    // body.btnBlock.removeChild(body.btnEdit);
+    // btnCancel.appendChild(textNodeCancel);
+    // btnSave.appendChild(textNodeSave);
+
+    // body.btnBlock.appendChild(btnSave);
+    // body.btnBlock.appendChild(btnCancel);
+
+    let position = $(body.elem).position();
+    let top = position.top;
+
+    // btnSave.setAttribute('style', `position:absolute;left:${left}px;top:${top + 5}px;z-index:1`);
+    // btnCancel.setAttribute('style', `position:absolute;left:${left + 50}px;top:${top + 5}px;z-index:1`);
+    // $(btnSave).off('click').on('click', (event) =>{
+    //   _self.save($(this));
+    // });
+
+    // $(btnSave).off('click').on('click', (event) =>{
+    //   let send_body = {
+    //     elem: $(body.elem),
+    //     btnCancel: btnCancel,
+    //     btnEdit: body.btnEdit,
+    //     btnBlock:  body.btnBlock
+    //   }
+
+    //   _self.save(send_body);
+
+    // });
+
+    let context = $(body.elem);
+
+    var SaveButton = function (context) {
+      var ui = $.summernote.ui;
+    
+      // create button
+      var button = ui.button({
+        className: 'saveBtn',
+        background: '#337ab7',
+        contents: '<i class="fa fa-child"/> Save',
+        // tooltip: 'Save',
+        click: function () {
+
+          let send_body = {
+            elem: $(body.elem),
+          }
+
+      _self.save(send_body);
+        }
+      });
+    
+      return button.render();   // return button as jquery object
+    }
+
+    $(context).summernote({
+      toolbar: [
+        ['style', ['style']],
+        ['font-style', ['bold', 'italic', 'underline', 'strikethrough', 'superscript', 'subscript', 'clear']],
+        ['font', ['fontname']],
+        ['font-size',['fontsize']],
+        ['font-color', ['color']],
+        ['para', ['ul', 'ol', 'paragraph']],
+        ['table', ['table']],
+        ['insert', ['link', 'picture', 'video', 'hr']],
+        ['misc', ['fullscreen', 'codeview', 'help']],
+        ['savebutton', ['save']]
+      ],
+      buttons: {
+        save: SaveButton
+      }
+    });
+
+    // $(btnCancel).off('click').on('click', (event) =>{
+    //   console.log('canceled');
+    //   // _self.save($(elem));
+    // });
+
+    $(body.elem).summernote();
+  }
+
+  save(body){
+    this.currentElem = body.elem;
+
+    // body.btnBlock.removeChild(body.btnCancel);
+    // body.btnBlock.removeChild(body.btnSave);
+    // body.btnBlock.appendChild(body.btnEdit);
+
+    let markup = $(body.elem).summernote('code');
+
+    $(body.elem).summernote('destroy');
   }
   // on submit method
   savePost(event) {
@@ -181,23 +239,18 @@ export class HomeComponent implements OnInit {
           if(targContext[0].classList.contains('click2edit')){
             // debugger
             if (!this.btnExist){
-              // if($(target).parents('.click2edit')[0]){
                 this.btnExist = true;
                 let btnEdit = document.createElement('button');
                 let textNode = document.createTextNode('Edit');
-                // let parentBlock = $(target).parents('.click2edit')[0];
                 let parentBlock = targContext[0];
                 $(btnEdit).on('click', (event) =>{
                   debugger
-                  this.edit(targContext[0]);
+                  // this.edit(targContext[0]);
                 })
-                // event.preventDe
+
                 btnEdit.appendChild(textNode);
-                
-                // parentBlock[0].append(btnEdit)
-                // $(this).append(btnEdit)
+
                 parentBlock.append(btnEdit)
-                // event.currentTarget.appendChild(btnEdit);
             
                 // let left = parentBlock.width() - 100;
                 // let top = parentBlock.height() - 100;
@@ -211,107 +264,6 @@ export class HomeComponent implements OnInit {
           // debugger
         }
       }
-    // }
-
-      // event.target.parentElement.appendChild(btnEdit);
-      // console.log(event.target.parentElement);
-      // if (!this.btnExist){
-      //   if($(target).parents('.click2edit')[0]){
-      //     this.btnExist = true;
-      //     let btnEdit = document.createElement('button');
-      //     let textNode = document.createTextNode('Edit');
-      //     let parentBlock = $(target).parents('.click2edit')[0];
-      //     $(btnEdit).on('click', (event) =>{
-      //       debugger
-      //       this.edit(target);
-      //     })
-      //     // event.preventDe
-      //     btnEdit.appendChild(textNode);
-          
-      //     // parentBlock[0].append(btnEdit)
-      //     // $(this).append(btnEdit)
-      //     parentBlock.append(btnEdit)
-      //     // event.currentTarget.appendChild(btnEdit);
-      
-      //     // let left = parentBlock.width() - 100;
-      //     // let top = parentBlock.height() - 100;
-      //     let left = parentBlock.offsetWidth - 100;
-      //     let top = parentBlock.offsetHeight - 100;
-      //     btnEdit.setAttribute('style', `position:absolute;left:${left}px;top:${top}px`);
-      //   }
-      // }
-    // }else if(this.currentTarget !== target){
-
-    // }
-   
-    
-    // let btnEdit = document.createElement('button');
-    // let textNode = document.createTextNode('Edit');
-    // btnEdit.appendChild(textNode);
-    // if(!target.classList.contains('click2edit') && !target.classList.contains('body_container')){
-    //   let parentBlock = $(target).parents('.click2edit')
-    //   parentBlock[0].append(btnEdit)
-    //   // event.currentTarget.appendChild(btnEdit);
-  
-    //   let left = parentBlock.width() - 100;
-    //   let top = parentBlock.height() - 100;
-    //   // let top = event.target.offsetTop + height/2;
-    //   // let left = event.target.offsetLeft + width/2;
-    //   btnEdit.setAttribute('style', `position:absolute;left:${left}px;top:${top}px`);
-    // }else if(!target.classList.contains('body_container')){
-    //   target.appendChild(btnEdit);
-    //   // event.currentTarget.appendChild(btnEdit);
-  
-    //   let left = target.offsetWidth/2;
-    //   let top = target.offsetHeight/2;
-    //   // let top = event.target.offsetTop + height/2;
-    //   // let left = event.target.offsetLeft + width/2;
-    //   btnEdit.setAttribute('style', `position:absolute;left:${left}px;top:${top}px`);
-    // }
- 
-
-
-    
-//     let node = document.createTextNode('Edit')
-//     let width = event.target.offsetWidth / 2;
-//     let height = event.target.offsetHeight / 2;
-//     let top = event.target.offsetTop + height/2;
-//     let left = event.target.offsetLeft + width/2;
-// if(event.target.classList.contains('section')){
-//   if(event.target.id !== 'editElem'){
-//     parent.appendChild(node);
-//     parent.setAttribute('id', 'editElem');
-//     // parent.setAttribute('style', `position:absolute;left:${left}px;top:${top}px`);
-//     // event.target.appendChild(parent);
-//     event.target.style.background = 'yellowgreen'
-//     const children = event.relatedTarget.children
-//     // if(children){
-//     //       for(let child of children){
-//     //         if(child.id === 'editElem'){
-//     //           event.relatedTarget.removeChild(child)
-//     //         }
-//     //       }
-//     //     }
-//     // event.relatedTarget.removeChild(parent)
-//     event.relatedTarget.background = '#fff'
-//     // event.target.style.border = '1px solid #999';
-//     // if(this.lastTarget && event.target !== this.lastTarget){
-//     //   const children = this.lastTarget.children
-//     //   if(children){
-//     //     for(let child of children){
-//     //       if(child.id === 'editElem'){
-//     //         this.lastTarget.removeChild(child)
-//     //       }
-//     //     }
-//     //   }else{
-//     //     this.lastTarget.removeChild(parent)
-//     //   }
-      
-//     //     // this.lastTarget.style.border = 'none'
-//     // }
-//     this.lastTarget = event.target;
-//   }
-// }
    
   }
   editInner(){
